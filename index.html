@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance API Fetch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .input-container, .small-container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+        .input-container {
+            width: 45%;
+        }
+        .small-container {
+            width: 25%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 20px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        .url-display {
+            font-size: 14px;
+            color: #007bff;
+            word-break: break-all;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .color1 { background-color: #ffdddd; }
+        .color2 { background-color: #ddffdd; }
+        .color3 { background-color: #ddddff; }
+        .trade { padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Binance API Fetch Example</h1>
+    <div class="container">
+        <div class="input-container">
+            <h2>Aggregate Trade</h2>
+            <label for="symbol">Symbol:</label>
+            <input type="text" id="symbol" name="symbol" placeholder="e.g., BTCUSDT">
+            
+            <label for="startTime">Start Time (timestamp):</label>
+            <input type="text" id="startTime" name="startTime" placeholder="Start Time">
+            
+            <label for="endTime">End Time (timestamp):</label>
+            <input type="text" id="endTime" name="endTime" placeholder="End Time">
+            
+            <label for="limit">Limit:</label>
+            <input type="number" id="limit" name="limit" placeholder="Limit">
+            
+            <label for="timezone">Timezone:</label>
+            <select id="timezone" name="timezone">
+                <option value="UTC">UTC+0</option>
+                <option value="Asia/Shanghai">UTC+8</option>
+            </select>
+            
+            <button id="fetchButton">Fetch Aggregated Trades</button>
+            
+            <div id="apiUrl" class="url-display"></div>
+        </div>
+
+        <div class="small-container">
+            <h2>UNIX Timestamp Tool</h2>
+            <label for="unixTimestamp">UNIX Timestamp:</label>
+            <input type="text" id="unixTimestamp" name="unixTimestamp" placeholder="Enter UNIX Timestamp">
+            
+            <label for="convertToUtc0">Converted to UTC+0:</label>
+            <input type="text" id="convertToUtc0" name="convertToUtc0" readonly>
+            
+            <label for="convertToUtc8">Converted to UTC+8:</label>
+            <input type="text" id="convertToUtc8" name="convertToUtc8" readonly>
+        </div>
+
+        <div class="small-container">
+            <h2>HistoricalTrade (fromID)</h2>
+            <label for="symbolHistorical">Symbol:</label>
+            <input type="text" id="symbolHistorical" name="symbolHistorical" placeholder="e.g., BTCUSDT">
+            
+            <label for="fromId">From ID:</label>
+            <input type="text" id="fromId" name="fromId" placeholder="From ID">
+            
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey" name="apiKey" placeholder="Enter API Key">
+            
+            <button id="fetchHistoricalButton">Fetch Historical Trades</button>
+            
+            <pre id="historicalOutput"></pre>
+        </div>
+    </div>
+    
+    <pre id="output"></pre>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
