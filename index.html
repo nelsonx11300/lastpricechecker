@@ -3,138 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binance API Fetch</title>
+    <title>Binance Trades Checker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #444;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
             max-width: 1200px;
-            margin: 20px auto;
-        }
-        .input-container, .small-container {
+            margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: 10px;
         }
-        .input-container {
-            width: 45%;
-        }
-        .small-container {
-            width: 25%;
+        .form-group {
+            margin-bottom: 15px;
         }
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
         }
-        input, select, button {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
         }
         button {
-            background-color: #007bff;
-            color: #fff;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #45a049;
         }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding: 20px;
+        #result {
+            margin-top: 20px;
+            padding: 10px;
             border: 1px solid #ddd;
+            display: none;
+        }
+        #aggTradesResult {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            display: none;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+        }
+        .trade-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .trades-container {
+            white-space: nowrap;
             overflow-x: auto;
-            max-width: 100%;
+            font-family: monospace;
+            width: 100%;
         }
-        .url-display {
-            font-size: 14px;
-            color: #007bff;
-            word-break: break-all;
-            margin-top: -10px;
-            margin-bottom: 20px;
+        .same-time {
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
         }
-        .color1 { background-color: #ffdddd; }
-        .color2 { background-color: #ddffdd; }
-        .color3 { background-color: #ddddff; }
-        .trade { padding: 5px; }
+        .contains-original-id {
+            border: 2px solid red !important;
+            font-weight: bold;
+            position: relative;
+            padding-left: 20px !important;
+            background-color: #ffffa0 !important;
+            color: #000000;
+            font-size: 1.05em;
+        }
+        .contains-original-id::before {
+            content: "➤ ";
+            position: absolute;
+            left: 4px;
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Binance API Fetch LastPrice</h1>
-    <div class="container">
-        <div class="input-container">
-            <h2>Aggregate Trade</h2>
-            <label for="symbol">Symbol:</label>
-            <input type="text" id="symbol" name="symbol" placeholder="e.g., BTCUSDT">
-            
-            <label for="startTime">Start Time (timestamp):</label>
-            <input type="text" id="startTime" name="startTime" placeholder="Start Time">
-            
-            <label for="endTime">End Time (timestamp):</label>
-            <input type="text" id="endTime" name="endTime" placeholder="End Time">
-            
-            <label for="limit">Limit:</label>
-            <input type="number" id="limit" name="limit" placeholder="Limit">
-            
-            <label for="timezone">Timezone:</label>
-            <select id="timezone" name="timezone">
-                <option value="UTC">UTC+0</option>
-                <option value="Asia/Shanghai">UTC+8</option>
-            </select>
-            
-            <button id="fetchButton">Fetch Aggregated Trades</button>
-            
-            <div id="apiUrl" class="url-display"></div>
-        </div>
-
-        <div class="small-container">
-            <h2>UNIX Timestamp Tool</h2>
-            <label for="unixTimestamp">UNIX Timestamp:</label>
-            <input type="text" id="unixTimestamp" name="unixTimestamp" placeholder="Enter UNIX Timestamp">
-            
-            <label for="convertToUtc0">Converted to UTC+0:</label>
-            <input type="text" id="convertToUtc0" name="convertToUtc0" readonly>
-            
-            <label for="convertToUtc8">Converted to UTC+8:</label>
-            <input type="text" id="convertToUtc8" name="convertToUtc8" readonly>
-        </div>
-
-        <div class="small-container">
-            <h2>HistoricalTrade (fromID)</h2>
-            <label for="symbolHistorical">Symbol:</label>
-            <input type="text" id="symbolHistorical" name="symbolHistorical" placeholder="e.g., BTCUSDT">
-            
-            <label for="fromId">From ID:</label>
-            <input type="text" id="fromId" name="fromId" placeholder="From ID">
-            
-            <label for="apiKey">API Key:</label>
-            <input type="text" id="apiKey" name="apiKey" placeholder="Enter API Key">
-            
-            <button id="fetchHistoricalButton">Fetch Historical Trades</button>
-            
-            <pre id="historicalOutput"></pre>
-        </div>
+    <h1>Binance Trades Checker</h1>
+    
+    <div class="form-group">
+        <label for="apiKey">Binance API Key:</label>
+        <input type="text" id="apiKey" placeholder="Enter your Binance API Key">
     </div>
     
-    <pre id="output"></pre>
-
-    <script src="script.js" defer></script>
+    <div class="form-group">
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" placeholder="Enter the trading pair (e.g. BTCUSDT)">
+    </div>
+    
+    <div class="form-group">
+        <label for="tradeId">Trade ID:</label>
+        <input type="text" id="tradeId" placeholder="Enter the trade ID">
+    </div>
+    
+    <button id="checkBtn">Check Trade</button>
+    
+    <div id="result"></div>
+    <div id="aggTradesResult"></div>
+    
+    <script>
+        document.getElementById('checkBtn').addEventListener('click', async function() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const symbol = document.getElementById('symbol').value.trim();
+            const tradeId = document.getElementById('tradeId').value.trim();
+            const resultDiv = document.getElementById('result');
+            const aggTradesResultDiv = document.getElementById('aggTradesResult');
+            
+            resultDiv.style.display = 'block';
+            aggTradesResultDiv.style.display = 'none';
+            
+            if (!apiKey || !tradeId || !symbol) {
+                resultDiv.innerHTML = '<p class="error">Please enter API Key, Symbol, and Trade ID</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                // First API call - historicalTrades
+                const apiUrl = 'https://fapi.binance.com/fapi/v1/historicalTrades';
+                const url = `${apiUrl}?symbol=${encodeURIComponent(symbol)}&fromId=${tradeId}&limit=1`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-MBX-APIKEY': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const trade = data[0];
+                    resultDiv.innerHTML = `
+                        <h3>Trade Information</h3>
+                        <p>Trade ID: ${trade.id}</p>
+                        <p>Timestamp: ${trade.time}</p>
+                        <p>Date: ${new Date(trade.time).toUTCString()} (UTC+0)</p>
+                        <p>Price: ${trade.price}</p>
+                        <p>Quantity: ${trade.qty}</p>
+                    `;
+                    
+                    // Make the second API call - aggTrades
+                    try {
+                        aggTradesResultDiv.style.display = 'block';
+                        aggTradesResultDiv.innerHTML = '<p>Loading aggregate trades data...</p>';
+                        
+                        // Set startTime with last two digits as zeros
+                        const startTime = Math.floor(trade.time / 100) * 100 - 100;
+                        
+                        const aggTradesUrl = 'https://fapi.binance.com/fapi/v1/aggTrades';
+                        const aggTradesFullUrl = `${aggTradesUrl}?symbol=${encodeURIComponent(symbol)}&startTime=${startTime}&limit=1000`;
+                        
+                        const aggTradesResponse = await fetch(aggTradesFullUrl, {
+                            method: 'GET',
+                            headers: {
+                                'X-MBX-APIKEY': apiKey
+                            }
+                        });
+                        
+                        if (!aggTradesResponse.ok) {
+                            throw new Error(`Agg Trades API Error: ${aggTradesResponse.status} ${aggTradesResponse.statusText}`);
+                        }
+                        
+                        const aggTradesData = await aggTradesResponse.json();
+                        
+                        if (aggTradesData && aggTradesData.length > 0) {
+                            // Check if the original trade ID is in any of the aggTrades
+                            let containsOriginalTrade = false;
+                            let containingTradeIds = [];
+                            
+                            aggTradesData.forEach(aggTrade => {
+                                if (Number(trade.id) >= Number(aggTrade.f) && Number(trade.id) <= Number(aggTrade.l)) {
+                                    containsOriginalTrade = true;
+                                    containingTradeIds.push(aggTrade.a);
+                                }
+                            });
+                            
+                            let aggTradesHtml = `
+                                <h3>Aggregate Trades Information</h3>
+                                <p>StartTime used: ${startTime} (${new Date(startTime).toUTCString()} UTC+0)</p>
+                                <p>Total trades found: ${aggTradesData.length}</p>
+                                <p>API URL: <code>${aggTradesFullUrl}</code></p>
+                                <p>Original Trade ID ${trade.id} is ${containsOriginalTrade ? `<strong style="color:red;">FOUND</strong> in ${containingTradeIds.length} aggregate trades (highlighted below)` : 'not found in any aggregate trades'}</p>
+                                <div class="trades-container">
+`;
+                            
+                            // Assign a color to each unique timestamp
+                            const timeColors = {};
+                            const colors = [
+                                '#ffcccc', '#ccffcc', '#ccccff', '#ffffcc', '#ffccff', '#ccffff',
+                                '#ffdab9', '#e6e6fa', '#f0e68c', '#d8bfd8', '#ffe4e1', '#f0fff0',
+                                '#d3d3d3', '#ffc0cb', '#90ee90', '#add8e6', '#f08080', '#e0ffff'
+                            ];
+                            
+                            // Get all unique timestamps and sort them
+                            const uniqueTimes = [...new Set(aggTradesData.map(trade => trade.T))].sort();
+                            
+                            // Assign colors to each unique timestamp
+                            uniqueTimes.forEach((time, index) => {
+                                timeColors[time] = colors[index % colors.length];
+                            });
+                            
+                            aggTradesData.forEach((aggTrade) => {
+                                const timestamp = new Date(aggTrade.T);
+                                const dateStr = timestamp.toUTCString();
+                                
+                                // Format date as "DD MMM YYYY HH:MM:SS.mmm GMT"
+                                const day = String(timestamp.getUTCDate()).padStart(2, '0');
+                                const month = dateStr.split(' ')[2]; // Get month abbreviation from toUTCString
+                                const year = timestamp.getUTCFullYear();
+                                const hours = String(timestamp.getUTCHours()).padStart(2, '0');
+                                const minutes = String(timestamp.getUTCMinutes()).padStart(2, '0');
+                                const seconds = String(timestamp.getUTCSeconds()).padStart(2, '0');
+                                const milliseconds = String(timestamp.getUTCMilliseconds()).padStart(3, '0');
+                                
+                                const formattedDate = `${day} ${month} ${year} ${hours}:${minutes}:${seconds}.${milliseconds} GMT`;
+                                
+                                // Assign color to this trade based on its timestamp
+                                const style = `style="background-color: ${timeColors[aggTrade.T]};"`;
+                                
+                                // Check if this agg trade contains the original trade ID
+                                const containsOriginalTradeId = Number(trade.id) >= Number(aggTrade.f) && Number(trade.id) <= Number(aggTrade.l);
+                                
+                                // Make the trade bold if it contains the original trade ID
+                                const tradeText = `ID: ${aggTrade.a}, Price: ${aggTrade.p}, Quantity: ${aggTrade.q}, FirstTradeID: ${aggTrade.f}, LastTradeID: ${aggTrade.l}, Timestamp: ${formattedDate} (UTC+0)`;
+                                
+                                if (containsOriginalTradeId) {
+                                    aggTradesHtml += `<div class="same-time contains-original-id">${tradeText}</div>\n`;
+                                } else {
+                                    aggTradesHtml += `<div class="same-time" ${style}>${tradeText}</div>\n`;
+                                }
+                            });
+                            
+                            aggTradesHtml += '</div>';
+                            aggTradesResultDiv.innerHTML = aggTradesHtml;
+                        } else {
+                            aggTradesResultDiv.innerHTML = '<p class="error">No aggregate trades data found for the given parameters</p>';
+                        }
+                    } catch (aggTradesError) {
+                        console.error('Agg Trades Error:', aggTradesError);
+                        aggTradesResultDiv.innerHTML = `<p class="error">Agg Trades Error: ${aggTradesError.message}</p>`;
+                    }
+                } else {
+                    resultDiv.innerHTML = '<p class="error">No trade data found for the given ID</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
 </body>
 </html>
