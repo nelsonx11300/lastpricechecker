@@ -159,8 +159,8 @@
                         aggTradesResultDiv.style.display = 'block';
                         aggTradesResultDiv.innerHTML = '<p>Loading aggregate trades data...</p>';
                         
-                        // Set startTime with last two digits as zeros
-                        const startTime = Math.floor(trade.time / 100) * 100 - 100;
+                        // Set startTime by just subtracting 100 from original timestamp
+                        const startTime = trade.time - 100;
                         
                         const aggTradesUrl = 'https://fapi.binance.com/fapi/v1/aggTrades';
                         const aggTradesFullUrl = `${aggTradesUrl}?symbol=${encodeURIComponent(symbol)}&startTime=${startTime}&limit=1000`;
